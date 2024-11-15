@@ -41,10 +41,22 @@ app.get("/usuarios",(req, res)=>{
 app.post('/usuarios',validarUsuario, (req, res) => {
     const usuarios = leerUsuarios()//agregar esto
     console.log(usuarios) //trae datos viejos
-    var { nombre } = req.body
+
+    const { nombre } = req.body;
+
+    //2 metodos para verificar que el nombre no se repita..
+    const existeUsuario = usuarios.some(u => u.nombre === nombre);
+    if (existeUsuario) {
+        return res.status(400).json({ mensaje: "El nombre ya existe, no se puede agregar un usuario duplicado." });
+    }
+    // for (let i = 0; i < usuarios.length; i++) {
+    //     if (usuarios[i].nombre === nombre) {
+    //         return res.status(400).json({ mensaje: "El nombre ya existe, no se puede agregar un usuario duplicado." });
+    //     }
+    // }
+
 
     const nuevoUsuario = { id: usuarios.length + 1, ...req.body}; 
-    
 
     usuarios.push(nuevoUsuario)
     console.log(usuarios) //trae datos nuevos
