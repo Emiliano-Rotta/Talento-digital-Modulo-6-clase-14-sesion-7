@@ -1,101 +1,101 @@
-const express = require('express')
-const fs = require('fs'); //agregar esto
-const app = express()
-const PORT = 3000
-app.use(express.json()); 
+// const express = require('express')
+// const fs = require('fs'); //agregar esto
+// const app = express()
+// const PORT = 3000
+// app.use(express.json()); 
 
-const path = './usuarios.json' //agregar esto
+// const path = './usuarios.json' //agregar esto
 
-//funcion nueva
-const leerUsuarios = () =>{
-    if(!fs.existsSync(path)){
-        fs.writeFileSync(path, JSON.stringify([]))// Si el archivo no existe, lo creamos vacío
-    }
-    const data = fs.readFileSync(path, "utf-8")
-    return JSON.parse(data)
-}
-//funcion nueva
-const escribirUsuario  = (data) =>{
-    fs.writeFileSync(path, JSON.stringify(data, null, 2))
-}
-
-
-function validarUsuario(req, res, next) {
-    const { nombre, edad } = req.body;
-    const keys = Object.keys(req.body); 
-    if(keys.length !== 2 || !keys.includes('nombre') || !keys.includes('edad') ){
-        return res.status(400).json({ mensaje: 'Solo se permite nombre y edad como propiedades.' });
-    }
-    if (typeof nombre !== 'string' || typeof edad !== 'number') {
-        return res.status(400).json({ mensaje: 'El nombre debe ser un texto y el edad un número.' });
-      }
-
-    next();
-}
-
-app.get("/usuarios",(req, res)=>{
-    const usuarios = leerUsuarios()//agregar esto
-    res.send(usuarios)
-})
-
-app.post('/usuarios',validarUsuario, (req, res) => {
-    const usuarios = leerUsuarios()//agregar esto
-    console.log(usuarios) //trae datos viejos
-
-    const { nombre } = req.body;
-
-    //2 metodos para verificar que el nombre no se repita..
-    const existeUsuario = usuarios.some(u => u.nombre === nombre);
-    if (existeUsuario) {
-        return res.status(400).json({ mensaje: "El nombre ya existe, no se puede agregar un usuario duplicado." });
-    }
-    // for (let i = 0; i < usuarios.length; i++) {
-    //     if (usuarios[i].nombre === nombre) {
-    //         return res.status(400).json({ mensaje: "El nombre ya existe, no se puede agregar un usuario duplicado." });
-    //     }
-    // }
+// //funcion nueva
+// const leerUsuarios = () =>{
+//     if(!fs.existsSync(path)){
+//         fs.writeFileSync(path, JSON.stringify([]))// Si el archivo no existe, lo creamos vacío
+//     }
+//     const data = fs.readFileSync(path, "utf-8")
+//     return JSON.parse(data)
+// }
+// //funcion nueva
+// const escribirUsuario  = (data) =>{
+//     fs.writeFileSync(path, JSON.stringify(data, null, 2))
+// }
 
 
-    const nuevoUsuario = { id: usuarios.length + 1, ...req.body}; 
+// function validarUsuario(req, res, next) {
+//     const { nombre, edad } = req.body;
+//     const keys = Object.keys(req.body); 
+//     if(keys.length !== 2 || !keys.includes('nombre') || !keys.includes('edad') ){
+//         return res.status(400).json({ mensaje: 'Solo se permite nombre y edad como propiedades.' });
+//     }
+//     if (typeof nombre !== 'string' || typeof edad !== 'number') {
+//         return res.status(400).json({ mensaje: 'El nombre debe ser un texto y el edad un número.' });
+//       }
 
-    usuarios.push(nuevoUsuario)
-    console.log(usuarios) //trae datos nuevos
-    escribirUsuario(usuarios) //el usuario con el dato nuevo es el que paso
-    res.status(201).json(nuevoUsuario);
-})
+//     next();
+// }
 
-app.put("/usuarios/:id", validarUsuario, (req, res)=>{
-    const usuarios = leerUsuarios()//agregar esto
-    const id = parseInt(req.params.id)
-    const index = usuarios.findIndex((producto) => producto.id === id);
+// app.get("/usuarios",(req, res)=>{
+//     const usuarios = leerUsuarios()//agregar esto
+//     res.send(usuarios)
+// })
 
-    if (index !== -1) {
-      usuarios[index] = { ...usuarios[index], ...req.body };
-      escribirUsuario(usuarios)
-      res.json(usuarios[index]);
-    } else {
-      res.status(404).json({ mensaje: 'Usuario no encontrado' });
-    }
-  });
+// app.post('/usuarios',validarUsuario, (req, res) => {
+//     const usuarios = leerUsuarios()//agregar esto
+//     console.log(usuarios) //trae datos viejos
 
-app.delete("/usuarios/:id",(req, res)=>{
-    let usuarios = leerUsuarios();
-    const id = parseInt(req.params.id)
-    const nuevosUsuarios = usuarios.filter((u) => u.id !== id);
+//     const { nombre } = req.body;
 
-    if (usuarios.length !== nuevosUsuarios.length) {
-        escribirUsuario(nuevosUsuarios); // Guardamos la lista actualizada en el archivo
-        res.json({ mensaje: `Usuario con ID ${id} eliminado` });
-
-    } else {
-        res.status(404).json({ mensaje: 'Usuario no encontrado' });
-    }
-})
+//     //2 metodos para verificar que el nombre no se repita..
+//     const existeUsuario = usuarios.some(u => u.nombre === nombre);
+//     if (existeUsuario) {
+//         return res.status(400).json({ mensaje: "El nombre ya existe, no se puede agregar un usuario duplicado." });
+//     }
+//     // for (let i = 0; i < usuarios.length; i++) {
+//     //     if (usuarios[i].nombre === nombre) {
+//     //         return res.status(400).json({ mensaje: "El nombre ya existe, no se puede agregar un usuario duplicado." });
+//     //     }
+//     // }
 
 
-app.listen(PORT, ()=>{
-    console.log(`Servidor escuchando en http://localhost:${PORT}`)
-})
+//     const nuevoUsuario = { id: usuarios.length + 1, ...req.body}; 
+
+//     usuarios.push(nuevoUsuario)
+//     console.log(usuarios) //trae datos nuevos
+//     escribirUsuario(usuarios) //el usuario con el dato nuevo es el que paso
+//     res.status(201).json(nuevoUsuario);
+// })
+
+// app.put("/usuarios/:id", validarUsuario, (req, res)=>{
+//     const usuarios = leerUsuarios()//agregar esto
+//     const id = parseInt(req.params.id)
+//     const index = usuarios.findIndex((producto) => producto.id === id);
+
+//     if (index !== -1) {
+//       usuarios[index] = { ...usuarios[index], ...req.body };
+//       escribirUsuario(usuarios)
+//       res.json(usuarios[index]);
+//     } else {
+//       res.status(404).json({ mensaje: 'Usuario no encontrado' });
+//     }
+//   });
+
+// app.delete("/usuarios/:id",(req, res)=>{
+//     let usuarios = leerUsuarios();
+//     const id = parseInt(req.params.id)
+//     const nuevosUsuarios = usuarios.filter((u) => u.id !== id);
+
+//     if (usuarios.length !== nuevosUsuarios.length) {
+//         escribirUsuario(nuevosUsuarios); // Guardamos la lista actualizada en el archivo
+//         res.json({ mensaje: `Usuario con ID ${id} eliminado` });
+
+//     } else {
+//         res.status(404).json({ mensaje: 'Usuario no encontrado' });
+//     }
+// })
+
+
+// app.listen(PORT, ()=>{
+//     console.log(`Servidor escuchando en http://localhost:${PORT}`)
+// })
 
 
 
@@ -109,61 +109,84 @@ app.listen(PORT, ()=>{
 // PUT /libros/:id: Actualizar el título o el autor de un libro según su id.
 // DELETE /libros/:id: Eliminar un libro por su id.
 
-// const express = require('express');
-// const app = express();
-// app.use(express.json()); //necesario para las rutas post put
-// const PORT = 3000
+const express = require('express');
+const fs = require('fs');
+const app = express();
+app.use(express.json()); //necesario para las rutas post put
+const PORT = 3000
 
-// let libros = [
-//     { id: 1, titulo: 'Cien Años de Soledad', autor: 'Gabriel García Márquez' },
-//     { id: 2, titulo: 'Don Quijote', autor: 'Miguel de Cervantes' },
-// ];
+const librosPath = './libros.json'
 
-// function validarLibro(req, res, next) {
-//     const { titulo, autor } = req.body
-//     const keys = Object.keys(req.body)
-//     if (keys.length !== 2 || !keys.includes('titulo') || !keys.includes('autor')) {
-//         return res.status(400).json({ mensaje: 'Solo se permite titulo y autor como propiedades.' });
-//     }
-//     if (typeof titulo !== 'string' || typeof autor !== 'string') {
-//         return res.status(400).json({ mensaje: 'El titulo y el autor deben ser texto.' });
-//     }
-//     next();
-// }
+function cargarLibros() {
+    if(!fs.existsSync(librosPath)) {
+        fs.writeFileSync(librosPath,"[]")
+    }
+    return JSON.parse(fs.readFileSync(librosPath,'utf8'))
+}
 
-// app.post('/libros', validarLibro, (req, res) => {
-//     const nuevoLibro = { id: libros.length + 1, ...req.body }
-//     libros.push(nuevoLibro)
-//     res.status(201).json(nuevoLibro)
-// })
-
-// app.get('/libros', (req, res) => {
-//     res.json(libros)
-// })
-
-// app.put('/libros/:id', validarLibro, (req, res) => {
-//     const id = parseInt(req.params.id);
-//     const index = libros.findIndex((lib) => lib.id === id)
-//     if (index !== -1) {
-//         libros[index] = { ...libros[index], ...req.body };
-//         res.json(libros[index])
-//     } else {
-//         res.status(404).json({ mensaje: 'Libro no encontrado' });
-//     }
-// })
+function guardarLibros(libros){
+    fs.writeFileSync(librosPath, JSON.stringify(libros, null, 2))
+}
 
 
-// app.delete('/libros/:id', (req, res) => {
-//     const id = parseInt(req.params.id);
-//     libros = libros.filter((lib) => lib.id !== id)
-//     res.json({ mensaje: `Libro con ID ${id} eliminado` });
-// })
+function validarLibro(req, res, next) {
+    const { titulo, autor } = req.body
+    const keys = Object.keys(req.body)
+    if (keys.length !== 2 || !keys.includes('titulo') || !keys.includes('autor')) {
+        return res.status(400).json({ mensaje: 'Solo se permite titulo y autor como propiedades.' });
+    }
+    if (typeof titulo !== 'string' || typeof autor !== 'string') {
+        return res.status(400).json({ mensaje: 'El titulo y el autor deben ser texto.' });
+    }
+    next();
+}
+
+app.post('/libros', validarLibro, (req, res) => {
+    let libros = cargarLibros()
+    const nuevoLibro = { id: libros.length + 1, ...req.body }
+    libros.push(nuevoLibro)
+    guardarLibros(libros)
+    res.status(201).json(nuevoLibro)
+})
+
+app.get('/libros', (req, res) => {
+    let libros = cargarLibros()
+    res.json(libros)
+})
+
+app.put('/libros/:id', validarLibro, (req, res) => {
+    let libros = cargarLibros()
+    const id = parseInt(req.params.id);
+    const index = libros.findIndex((lib) => lib.id === id)
+
+    if (index !== -1) {
+        libros[index] = { ...libros[index], ...req.body };
+        guardarLibros(libros)
+        res.json(libros[index])
+    } else {
+        res.status(404).json({ mensaje: 'Libro no encontrado' });
+    }
+})
+
+
+app.delete('/libros/:id', (req, res) => {
+    let libros = cargarLibros()
+    const id = parseInt(req.params.id);
+    let nuevoLibros = libros.filter((lib) => lib.id !== id)
+    if(libros.length !== nuevoLibros.length){
+        guardarLibros(nuevoLibros)
+        res.json({ mensaje: `Libro con ID ${id} eliminado` });
+    }else{
+        res.status(404).json({ mensaje: `Libro no encontrado` });
+    }
+   
+})
 
 
 
-// app.listen(PORT, () => {
-//     console.log(`Servidor corriendo en puerto ${PORT}`)
-// })
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en puerto ${PORT}`)
+})
 
 
 
